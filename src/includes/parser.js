@@ -6,14 +6,14 @@ module.exports = (() => {
         static get quantities() {
             // 0th index will always be the "primary" unit on which all conversions are based
             // all other entries must have a conversion function that returns equivalent in primary unit
-            return [{
-                    name: 'temperature',
+            return {
+                temperature: {
                     units: [{
                             // symbol order is important here
                             // parser will loop through these and write down matches
                             // 'celsius' is more specific than 'c', so it will record this as the match text
                             // if 'c' were put first, all results would be normalized to the first match (c)
-                            symbols: [
+                            recognizedSymbols: [
                                 'degrees Celsius',
                                 'degrees Centigrade',
                                 'degrees C',
@@ -21,17 +21,19 @@ module.exports = (() => {
                                 'Celsius',
                                 'Centigrade',
                                 'C'
-                            ]
+                            ],
+                            printSymbol: 'C'
                         },
                         {
                             name: 'Fahrenheit',
-                            symbols: [
+                            recognizedSymbols: [
                                 'degrees Fahrenheit',
                                 'degrees F',
                                 'deg F',
                                 'Fahrenheit',
                                 'F'
                             ],
+                            printSymbol: 'F',
                             convertFrom: (fahrenheit) => {
                                 return (fahrenheit - 32) * 5.0 / 9.0;
                             },
@@ -41,9 +43,10 @@ module.exports = (() => {
                         },
                         {
                             name: 'Kelvin',
-                            symbols: [
+                            recognizedSymbols: [
                                 'Kelvin'
                             ],
+                            printSymbol: 'K',
                             convertFrom: (kelvin) => {
                                 return kelvin - 273.15;
                             },
@@ -52,16 +55,16 @@ module.exports = (() => {
                             }
                         }
                     ]
-                },
-
-            ]
+                }
+                // TODO: mass and length
+            }
         }
 
 
 
         constructor() {}
 
-        findValues(message) {
+        findQuantities(message) {
             // define base pattern
             // can take a plus/minus sign, optional leading digits, optional decimal, mandatory number(s), optional space, then (case insens.) unit
 
@@ -70,39 +73,47 @@ module.exports = (() => {
 
             let indexOfFoundValue = -1;
 
-            for (let quantityIdx = 0; quantityIdx < MessageParser.quantities.length; quantityIdx++) {
-                let quantity = MessageParser.quantities[quantityIdx];
-                
-                for (let unitIdx = 0; unitIdx < quantity.units.length; unitIdx++) {
-                    let unit = quantity.units[unitIdx];
-                    
+            for (let quantityName in MessageParser.quantities) {
+                if (MessageParser.quantities.hasOwnProperty(quantityName)) {
+                    let quantity = MessageParser.quantities[quantityName];
 
-                    for (let symbolIdx = 0; symbolIdx < unit.symbols.length; symbolIdx++) {
-                        let symbol = unit.symbols[symbolIdx];
+                    for (let unitIdx = 0; unitIdx < quantity.units.length; unitIdx++) {
+                        let unit = quantity.units[unitIdx];
 
-                        let regex = new RegExp('([+-]?[0-9]*\\.*[0-9]+) *(' + symbol + ')', 'gi')
+                        for (let symbolIdx = 0; symbolIdx < unit.recognizedSymbols.length; symbolIdx++) {
+                            let symbol = unit.recognizedSymbols[symbolIdx];
 
-                        var match;
-                        while (match = regex.exec(message.content)) {
-                            if (matchedIndices.indexOf(match.index) === -1) {
-                                // add to the list of matches so we don't double-count this
-                                // eg 99 Celsius being counted again as 99 C
-                                matchedIndices.push(match.index);
+                            let regex = new RegExp('([+-]?[0-9]*\\.*[0-9]+) *(' + symbol + ')', 'gi')
 
-                                matches.push({
-                                    index: match.index,
-                                    originalValue: match[0]
-                                });
+                            var match;
+                            while (match = regex.exec(message.content)) {
+                                if (matchedIndices.indexOf(match.index) === -1) {
+                                    // add to the list of matches so we don't double-count this
+                                    // eg 99 Celsius being counted again as 99 C
+                                    matchedIndices.push(match.index);
+
+                                    matches.push({
+                                        msgIdx: match.index,
+                                        unitIdx: unitIdx,
+                                        originalValue: match[0],
+                                        quantity: quantityName
+                                    });
+                                }
                             }
                         }
                     }
                 }
             }
 
-
             return matches.sort((a, b) => {
                 if (a.index < b.index) return -1;
                 else return 1;
+            });
+        }
+
+        convertQuantities (matches) {
+            let convertedQuantities = matches.map((match) => {
+                
             });
         }
     }

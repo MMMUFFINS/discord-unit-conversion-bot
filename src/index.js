@@ -36,7 +36,7 @@ client.on('message', message => {
         return;
     }
     else {
-        let matches = parser.findValues(message);
+        let matches = parser.findQuantities(message);
         console.log(matches);
         let replyText = '';
         
