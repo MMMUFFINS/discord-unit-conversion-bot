@@ -7,6 +7,7 @@
 // Import the discord.js module
 const Discord = require('discord.js');
 const fs = require('fs');
+const parser = require('./includes/parser');
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
@@ -26,6 +27,9 @@ client.on('message', message => {
     if (message.content === 'ping') {
         // Send "pong" to the same channel
         message.channel.send('pong');
+    }
+    else {
+        parser.findValues(message);
     }
 });
 
