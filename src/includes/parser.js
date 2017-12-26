@@ -92,10 +92,14 @@ module.exports = (() => {
                                     // eg 99 Celsius being counted again as 99 C
                                     matchedIndices.push(match.index);
 
+                                    // get the number value
+                                    let numVal = Number(match[1]);
+
                                     matches.push({
                                         msgIdx: match.index,
                                         unitIdx: unitIdx,
-                                        originalValue: match[0],
+                                        rawText: match[0],
+                                        numVal: numVal,
                                         quantity: quantityName
                                     });
                                 }
@@ -111,10 +115,36 @@ module.exports = (() => {
             });
         }
 
-        convertQuantities (matches) {
+        convertQuantities(matches) {
             let convertedQuantities = matches.map((match) => {
+                let output = match;
+//                 console.log('output')
+//                 console.log(output)
+                output.conversions = [];
+
+
+                let matchedQuantity = MessageParser.quantities[match.quantity];
+//                 console.log('matchedQuantity')
+//                 console.log(matchedQuantity)
+
+                // if base unit, convert to others, skip converting to itself
+                if (match.unitIdx === 0) {
+                    for (let i = 1; i < matchedQuantity.units.length; i++) {
+                        let unit = matchedQuantity.units[i];
+                        output.conversions.push({
+                            value: unit.convertTo(match.numVal),
+                            symbol: unit.printSymbol
+                        });
+                    }
+                }
                 
+                return output;
             });
+            
+            console.log('convertedQuantities')
+            console.log(convertedQuantities)
+
+            return convertedQuantities;
         }
     }
 

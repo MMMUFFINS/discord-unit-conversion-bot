@@ -38,15 +38,22 @@ client.on('message', message => {
     else {
         let matches = parser.findQuantities(message);
         console.log(matches);
-        let replyText = '';
+        let converted = parser.convertQuantities(matches);
+        let hasConverted = false;
+        let replyText = 'I heard you were converting units.';
         
-        for (let i = 0; i < matches.length; i++) {
-            replyText += matches[i].originalValue;
-            if (i < (matches.length -1)) {
-                replyText += '\n';
+        for (let i = 0; i < converted.length; i++) {
+            hasConverted = true;
+            console.log('converted array')
+            console.log(converted);
+            replyText += '\n' + converted[i].rawText;
+            for (let j = 0; j < converted[i].conversions.length; j++) {
+                let convertedObj = converted[i].conversions[j];
+                
+                replyText += '\n = ' + convertedObj.value + ' ' + convertedObj.symbol;
             }
         }
-        if (replyText.length > 0) {
+        if (hasConverted) {
             console.log('sending reply');
             message.channel.send(replyText)
             .then((reply) => {
