@@ -23,9 +23,6 @@ client.on('ready', () => {
 
 // Create an event listener for messages
 client.on('message', message => {
-    console.log('received message');
-    console.log(message.content);
-    
     // ignore bots, including itself! THIS IS IMPORTANT
     if (message.author.bot) return;
     
@@ -44,23 +41,19 @@ client.on('message', message => {
         
         for (let i = 0; i < converted.length; i++) {
             hasConverted = true;
-            console.log('converted array')
-            console.log(converted);
             replyText += '\n' + converted[i].rawText;
             for (let j = 0; j < converted[i].conversions.length; j++) {
                 let convertedObj = converted[i].conversions[j];
                 
-                replyText += '\n = ' + convertedObj.value + ' ' + convertedObj.symbol;
+                replyText += '\n = ' + convertedObj.value.toFixed(2) + ' ' + convertedObj.symbol;
             }
         }
         if (hasConverted) {
-            console.log('sending reply');
             message.channel.send(replyText)
             .then((reply) => {
-                console.log(`Sent message: ${reply.content}`)
+//                 console.log(`Sent message: ${reply.content}`)
                 return;
             });
-//             console.log(reply);
         }
     }
 });
