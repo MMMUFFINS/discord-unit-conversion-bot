@@ -118,29 +118,54 @@ module.exports = (() => {
         convertQuantities(matches) {
             let convertedQuantities = matches.map((match) => {
                 let output = match;
-//                 console.log('output')
-//                 console.log(output)
+                //                 console.log('output')
+                //                 console.log(output)
                 output.conversions = [];
 
 
                 let matchedQuantity = MessageParser.quantities[match.quantity];
-//                 console.log('matchedQuantity')
-//                 console.log(matchedQuantity)
+                //                 console.log('matchedQuantity')
+                //                 console.log(matchedQuantity)
 
                 // if base unit, convert to others, skip converting to itself
-                if (match.unitIdx === 0) {
-                    for (let i = 1; i < matchedQuantity.units.length; i++) {
-                        let unit = matchedQuantity.units[i];
+                for (let i = 0; i < matchedQuantity.units.length; i++) {
+                    let unit = matchedQuantity.units[i];
+                    let value = match.numVal;
+                    
+
+                    if (match.unitIdx === 0) {
+                        if (i === 0) continue;  // skip first because it's itself
+                        
                         output.conversions.push({
-                            value: unit.convertTo(match.numVal),
+                            value: unit.convertTo(value),
                             symbol: unit.printSymbol
                         });
                     }
-                }
-                
+                    else {
+                        if (i === match.unitIdx) continue;    // skip itself
+                        console.log('i');
+                        console.log(i)
+                        let inConvertedUnits;
+                        let matchedUnit = matchedQuantity.units[match.unitIdx];
+                        
+                        if (i === 0) {
+                            inConvertedUnits = matchedUnit.convertFrom(value);  // base unit was already converted to
+                        }
+                        else {
+                            let inPrimaryUnits = matchedUnit.convertFrom(value);
+                            inConvertedUnits = unit.convertTo(inPrimaryUnits);
+                        }
+                        
+                        output.conversions.push({
+                            value: inConvertedUnits,
+                            symbol: unit.printSymbol
+                        })
+                    }
+                } 
+
                 return output;
             });
-            
+
             console.log('convertedQuantities')
             console.log(convertedQuantities)
 
