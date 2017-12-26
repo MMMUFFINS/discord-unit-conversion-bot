@@ -83,7 +83,7 @@ module.exports = (() => {
                         for (let symbolIdx = 0; symbolIdx < unit.recognizedSymbols.length; symbolIdx++) {
                             let symbol = unit.recognizedSymbols[symbolIdx];
 
-                            let regex = new RegExp('([+-]?[0-9]*\\.*[0-9]+) *(' + symbol + ')', 'gi')
+                            let regex = new RegExp('(^| )([+-]?[0-9]*\\.*[0-9]+) *(' + symbol + ')', 'gim')
 
                             var match;
                             while (match = regex.exec(message.content)) {
@@ -93,7 +93,7 @@ module.exports = (() => {
                                     matchedIndices.push(match.index);
 
                                     // get the number value
-                                    let numVal = Number(match[1]);
+                                    let numVal = Number(match[2]);
 
                                     matches.push({
                                         msgIdx: match.index,
@@ -110,7 +110,7 @@ module.exports = (() => {
             }
 
             return matches.sort((a, b) => {
-                if (a.index < b.index) return -1;
+                if (a.msgIdx < b.msgIdx) return -1;
                 else return 1;
             });
         }
@@ -143,8 +143,6 @@ module.exports = (() => {
                     }
                     else {
                         if (i === match.unitIdx) continue;    // skip itself
-                        console.log('i');
-                        console.log(i)
                         let inConvertedUnits;
                         let matchedUnit = matchedQuantity.units[match.unitIdx];
                         
@@ -165,9 +163,6 @@ module.exports = (() => {
 
                 return output;
             });
-
-            console.log('convertedQuantities')
-            console.log(convertedQuantities)
 
             return convertedQuantities;
         }
