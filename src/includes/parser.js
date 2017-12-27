@@ -20,6 +20,7 @@ module.exports = (() => {
                                 'deg C',
                                 'Celsius',
                                 'Centigrade',
+                                'ºC',
                                 'C'
                             ],
                             printSymbol: 'C'
@@ -31,7 +32,9 @@ module.exports = (() => {
                                 'degrees F',
                                 'deg F',
                                 'Fahrenheit',
+                                'ºF',
                                 'F'
+
                             ],
                             printSymbol: 'F',
                             convertFrom: (fahrenheit) => {
@@ -52,6 +55,46 @@ module.exports = (() => {
                             },
                             convertTo: (celsius) => {
                                 return celsius + 273.15;
+                            }
+                        }
+                    ]
+                },
+                mass: {
+                    units: [{
+                            recognizedSymbols: [
+                                'kilograms',
+                                'kilos',
+                                'kg'
+                            ],
+                            printSymbol: 'kg'
+                        },
+                        {
+                            name: 'pounds',
+                            recognizedSymbols: [
+                                'pounds',
+                                'pder',
+                                'lbs'
+                            ],
+                            printSymbol: 'lbs',
+                            convertFrom: (pounds) => {
+                                return pounds/2.2046226218;
+                            },
+                            convertTo: (kg) => {
+                                return kg * 2.2046226218;
+                            }
+                        },
+                        {
+                            name: 'stone',
+                            recognizedSymbols: [
+                                'stone',
+                                'st'
+                            ],
+                            printSymbol: 'st',
+                            convertFrom: (stone) => {
+                                return stone * 6.35029318;
+                            },
+                            convertTo: (kg) => {
+                                return kg / 6.35029318;
                             }
                         }
                     ]
@@ -83,7 +126,7 @@ module.exports = (() => {
                         for (let symbolIdx = 0; symbolIdx < unit.recognizedSymbols.length; symbolIdx++) {
                             let symbol = unit.recognizedSymbols[symbolIdx];
 
-                            let regex = new RegExp('(^| )([+-]?[0-9]*\\.*[0-9]+) *(' + symbol + ')', 'gim')
+                            let regex = new RegExp('(^| )([+-]?[0-9]*\\.*[0-9]+) *(' + symbol + ')\\b', 'gim')
 
                             var match;
                             while (match = regex.exec(message.content)) {
@@ -131,35 +174,33 @@ module.exports = (() => {
                 for (let i = 0; i < matchedQuantity.units.length; i++) {
                     let unit = matchedQuantity.units[i];
                     let value = match.numVal;
-                    
+
 
                     if (match.unitIdx === 0) {
-                        if (i === 0) continue;  // skip first because it's itself
-                        
+                        if (i === 0) continue; // skip first because it's itself
+
                         output.conversions.push({
                             value: unit.convertTo(value),
                             symbol: unit.printSymbol
                         });
-                    }
-                    else {
-                        if (i === match.unitIdx) continue;    // skip itself
+                    } else {
+                        if (i === match.unitIdx) continue; // skip itself
                         let inConvertedUnits;
                         let matchedUnit = matchedQuantity.units[match.unitIdx];
-                        
+
                         if (i === 0) {
-                            inConvertedUnits = matchedUnit.convertFrom(value);  // base unit was already converted to
-                        }
-                        else {
+                            inConvertedUnits = matchedUnit.convertFrom(value); // base unit was already converted to
+                        } else {
                             let inPrimaryUnits = matchedUnit.convertFrom(value);
                             inConvertedUnits = unit.convertTo(inPrimaryUnits);
                         }
-                        
+
                         output.conversions.push({
                             value: inConvertedUnits,
                             symbol: unit.printSymbol
                         })
                     }
-                } 
+                }
 
                 return output;
             });
