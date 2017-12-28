@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "discord.js": "^11.2.1",
-    "save": "^2.3.2"
+    "discord.js": "^11.2.1"
   },
   "devDependencies": {},
   "scripts": {
